@@ -7,8 +7,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 
-import 'firebase_options.dart';
-import 'guest_book_message.dart'; 
+import '../firebase_options.dart';
+import '../guest_book_message.dart'; 
 
 StreamSubscription<QuerySnapshot>? _guestBookSubscription;
   List<GuestBookMessage> _guestBookMessages = [];

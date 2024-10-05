@@ -1,9 +1,20 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'guest_book_message.dart';
-import 'src/widgets.dart';
+import '../guest_book_message.dart';
+import '../src/widgets.dart';
 
+
+class GuestBook extends StatefulWidget {
+  const GuestBook(
+      {required this.addMessage, required this.messages, super.key});
+
+  final FutureOr<void> Function(String message) addMessage;
+  final List<GuestBookMessage> messages;
+
+  @override
+  State<GuestBook> createState() => _GuestBookState();
+}
 class _GuestBookState extends State<GuestBook> {
   final _formKey = GlobalKey<FormState>(debugLabel: '_GuestBookState');
   final _controller = TextEditingController();
