@@ -12,34 +12,36 @@ import '../guest_book_message.dart';
 
 enum Attending { yes, no, unknown }
 
-StreamSubscription<QuerySnapshot>? _guestBookSubscription;
-  List<GuestBookMessage> _guestBookMessages = [];
-  List<GuestBookMessage> get guestBookMessages => _guestBookMessages;
-
 class ApplicationState extends ChangeNotifier {
   ApplicationState() {
     init();
-    int _attendees = 0;
-    int get attendees => _attendees;
-
-    Attending _attending = Attending.unknown;
-    StreamSubscription<DocumentSnapshot>? _attendingSubscription;
-    Attending get attending => _attending;
-    set attending(Attending attending) {
-      final userDoc = FirebaseFirestore.instance
-        .collection('attendees')
-        .doc(FirebaseAuth.instance.currentUser!.uid);
-      if (attending == Attending.yes) {
-        userDoc.set(<String, dynamic>{'attending': true});
-      } else {
-        userDoc.set(<String, dynamic>{'attending': false});
   }
-}
-  }
-}
 
   bool _loggedIn = false;
   bool get loggedIn => _loggedIn;
+
+  StreamSubscription<QuerySnapshot>? _guestBookSubscription;
+  List<GuestBookMessage> _guestBookMessages = [];
+  List<GuestBookMessage> get guestBookMessages => _guestBookMessages;
+
+  // The first is a counter of how many people are attending.
+  int _attendees = 0;
+  int get attendees => _attendees;
+
+  //The second is the ability for a logged-in user to nominate whether they're attending.
+  Attending _attending = Attending.unknown;
+  StreamSubscription<DocumentSnapshot>? _attendingSubscription;
+  Attending get attending => _attending;
+  set attending(Attending attending) {
+    final userDoc = FirebaseFirestore.instance
+        .collection('attendees')
+        .doc(FirebaseAuth.instance.currentUser!.uid);
+    if (attending == Attending.yes) {
+      userDoc.set(<String, dynamic>{'attending': true});
+    } else {
+      userDoc.set(<String, dynamic>{'attending': false});
+    }
+  }
 
   Future<void> init() async {
     await Firebase.initializeApp(
@@ -57,10 +59,13 @@ class ApplicationState extends ChangeNotifier {
       _attendees = snapshot.docs.length;
       notifyListeners();
     });
-    
+
+
     FirebaseAuth.instance.userChanges().listen((user) {
       if (user != null) {
         _loggedIn = true;
+
+        //subscribe to guest book messages
         _guestBookSubscription = FirebaseFirestore.instance
             .collection('guestbook')
             .orderBy('timestamp', descending: true)
@@ -77,6 +82,8 @@ class ApplicationState extends ChangeNotifier {
           }
           notifyListeners();
         });
+
+        // subscribe to the participation status
         _attendingSubscription = FirebaseFirestore.instance
             .collection('attendees')
             .doc(user.uid)
@@ -93,11 +100,31 @@ class ApplicationState extends ChangeNotifier {
           }
           notifyListeners();
         });
+
       } else {
         _loggedIn = false;
+
+
         _guestBookMessages = [];
         _guestBookSubscription?.cancel();
+        _attendingSubscription?.cancel();
       }
       notifyListeners();
     });
   }
+
+  Future<DocumentReference> addMessageToGuestBook(String message) {
+    if (!_loggedIn) {
+      throw Exception('Must be logged in');
+    }
+
+    return FirebaseFirestore.instance
+        .collection('guestbook')
+        .add(<String, dynamic>{
+      'text': message,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+      'name': FirebaseAuth.instance.currentUser!.displayName,
+      'userId': FirebaseAuth.instance.currentUser!.uid,
+    });
+  }
+}
