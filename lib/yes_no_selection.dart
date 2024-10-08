@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'src/app_state.dart';
-import 'src/src/widgets.dart';
+import 'app_state.dart';
+import 'src/widgets.dart';
 
 class YesNoSelection extends StatelessWidget {
   const YesNoSelection(
@@ -17,7 +17,8 @@ class YesNoSelection extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
-              FilledButton(
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(elevation: 0),
                 onPressed: () => onSelection(Attending.yes),
                 child: const Text('YES'),
               ),
@@ -39,7 +40,8 @@ class YesNoSelection extends StatelessWidget {
                 child: const Text('YES'),
               ),
               const SizedBox(width: 8),
-              FilledButton(
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(elevation: 0),
                 onPressed: () => onSelection(Attending.no),
                 child: const Text('NO'),
               ),
