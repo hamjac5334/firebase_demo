@@ -1,4 +1,4 @@
-import 'dart:async';                                     // new
+import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart'
@@ -7,8 +7,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../firebase_options.dart';
-import '../guest_book_message.dart'; 
+import 'firebase_options.dart';
+import 'guest_book_message.dart';
 
 enum Attending { yes, no, unknown }
 
@@ -27,28 +27,9 @@ class ApplicationState extends ChangeNotifier {
   // The first is a counter of how many people are attending.
   int _attendees = 0;
   int get attendees => _attendees;
-  //added these 4 lines below
-  set attendees(int value) {
-    _attendees = value;
-    notifyListeners();
-  }
-
-  int _numberOfAttendees = 0;
-  StreamSubscription<DocumentSnapshot>? _attendingSubscription;
-  int get numberOfAttendees => _numberOfAttendees;
-
-  set numberOfAttendees(int value) {
-    final userDoc = FirebaseFirestore.instance
-        .collection('attendees')
-        .doc(FirebaseAuth.instance.currentUser!.uid);
-    
-    userDoc.set(<String, dynamic>{'attendees': value});
-    _numberOfAttendees = value;
-    notifyListeners();
-  }
 
   //The second is the ability for a logged-in user to nominate whether they're attending.
-  /*Attending _attending = Attending.unknown;
+  Attending _attending = Attending.unknown;
   StreamSubscription<DocumentSnapshot>? _attendingSubscription;
   Attending get attending => _attending;
   set attending(Attending attending) {
@@ -60,7 +41,7 @@ class ApplicationState extends ChangeNotifier {
     } else {
       userDoc.set(<String, dynamic>{'attending': false});
     }
-  }*/
+  }
 
   Future<void> init() async {
     await Firebase.initializeApp(
@@ -75,10 +56,6 @@ class ApplicationState extends ChangeNotifier {
         .where('attending', isEqualTo: true)
         .snapshots()
         .listen((snapshot) {
-      int totalAttendees = 0;
-      for (final doc in snapshot.docs) {
-        totalAttendees += (doc.data()['attendees'] ?? 0) as int;
-      }
       _attendees = snapshot.docs.length;
       notifyListeners();
     });
@@ -112,10 +89,14 @@ class ApplicationState extends ChangeNotifier {
             .doc(user.uid)
             .snapshots()
             .listen((snapshot) {
-            if (snapshot.data() != null) {
-            _numberOfAttendees = (snapshot.data()!['attendees'] ?? 0) as int;
+          if (snapshot.data() != null) {
+            if (snapshot.data()!['attending'] as bool) {
+              _attending = Attending.yes;
+            } else {
+              _attending = Attending.no;
+            }
           } else {
-            _numberOfAttendees = 0;
+            _attending = Attending.unknown;
           }
           notifyListeners();
         });
@@ -123,15 +104,18 @@ class ApplicationState extends ChangeNotifier {
       } else {
         _loggedIn = false;
 
-
+        //unsubscribe from guest book messages
         _guestBookMessages = [];
         _guestBookSubscription?.cancel();
+
+        //unsubscribe from participation status
         _attendingSubscription?.cancel();
       }
       notifyListeners();
     });
   }
 
+  // add data to Firestore
   Future<DocumentReference> addMessageToGuestBook(String message) {
     if (!_loggedIn) {
       throw Exception('Must be logged in');
