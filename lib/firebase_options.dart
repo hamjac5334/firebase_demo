@@ -57,6 +57,7 @@ class DefaultFirebaseOptions {
     appId: '1:695452408968:android:4cfc6dc307f0aa54db933d',
     messagingSenderId: '695452408968',
     projectId: 'fir-flutter-codelab-6be38',
-    storageBucket: 'fir-flutter-codelab-6be38.appspot.com',
+    storageBucket: 'fir-flutter-codelab-6be38.firebasestorage.app',
   );
+
 }
