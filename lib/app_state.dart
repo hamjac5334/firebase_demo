@@ -41,10 +41,24 @@ class ApplicationState extends ChangeNotifier {
       userDoc.set(<String, dynamic>{'attending': false});
     }
   }
-  //start with adding this before firebase so I can do it in steps
+  //Fix it and got the firbase working!!!
   void addAttendees(int count) {
-    _attendees += count;
-    notifyListeners();
+    final userDoc = FirebaseFirestore.instance
+        .collection('attendees')
+        .doc(FirebaseAuth.instance.currentUser!.uid);
+
+    userDoc.set({
+      'attending': true,
+      'guestCount': count,
+    }, SetOptions(merge: true)).then((_) {
+      FirebaseFirestore.instance.collection('attendees').get().then((snapshot) {
+        int totalAttendees = snapshot.docs.fold(0, (sum, doc) {
+          return sum + ((doc.data()['guestCount'] ?? 0) as int);
+        });
+        _attendees = totalAttendees;
+        notifyListeners();
+      });
+    });
   }
 
   Future<void> init() async {
@@ -60,7 +74,9 @@ class ApplicationState extends ChangeNotifier {
         .where('attending', isEqualTo: true)
         .snapshots()
         .listen((snapshot) {
-      _attendees = snapshot.docs.length;
+      _attendees = snapshot.docs.fold(0, (sum, doc) {
+        return sum + ((doc.data()['guestCount'] ?? 0) as int);
+      });
       notifyListeners();
     });
 

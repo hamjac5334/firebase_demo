@@ -37,7 +37,7 @@ class YesNoSelection extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               const Text('Guests #',
-                      //style: TextStyle(fontWeight: FontWeight.bold), fontSize: 40,  
+                      style: TextStyle(fontSize: 24,)  
                       ),
               const SizedBox(height: 8),
               Row(
@@ -48,7 +48,6 @@ class YesNoSelection extends StatelessWidget {
                       decoration: const InputDecoration(
                         hintText: 'Number of Guests (int)',
                       ),
-                      //keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Enter how many Guests are you bringing (int)';
@@ -63,12 +62,12 @@ class YesNoSelection extends StatelessWidget {
                       final input = _controller.text;
                       if (input.isNotEmpty) {
                         final count = int.tryParse(input);
-                        if (count != null && count > 0) {
+                        if (count != null && count >= 0) {
                           Provider.of<ApplicationState>(context, listen: false).addAttendees(count);
-                          _controller.clear(); // Clear the input after adding
+                          _controller.clear(); 
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Please enter a valid positive number')),
+                            const SnackBar(content: Text('Please enter a valid number')),
                           );
                         }
                       }
