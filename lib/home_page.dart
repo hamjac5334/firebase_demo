@@ -50,12 +50,12 @@ class HomePage extends StatelessWidget {
             builder: (context, appState, _) => Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                switch (appState.attendees) {
-                  1 => const Paragraph('1 person going'),
-                  >= 2 => Paragraph('${appState.attendees} people going'),
-                  _ => const Paragraph('No one going'),
-                },
-
+                if (appState.attendees == 1)
+                  const Paragraph('1 person going'),
+                if (appState.attendees > 1)
+                  Paragraph('${appState.attendees} people going'),
+                if (appState.attendees == 0)
+                  const Paragraph('No one going'),
                 if (appState.loggedIn) ...[
                   YesNoSelection(
                     state: appState.attending,
@@ -63,8 +63,7 @@ class HomePage extends StatelessWidget {
                   ),
                   const Header('Discussion'),
                   GuestBook(
-                    addMessage: (message) =>
-                        appState.addMessageToGuestBook(message),
+                    addMessage: (message) => appState.addMessageToGuestBook(message),
                     messages: appState.guestBookMessages,
                   ),
                 ],

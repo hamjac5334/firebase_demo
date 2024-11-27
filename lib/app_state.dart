@@ -41,6 +41,11 @@ class ApplicationState extends ChangeNotifier {
       userDoc.set(<String, dynamic>{'attending': false});
     }
   }
+  //start with adding this before firebase so I can do it in steps
+  void addAttendees(int count) {
+    _attendees += count;
+    notifyListeners();
+  }
 
   Future<void> init() async {
     await Firebase.initializeApp(
